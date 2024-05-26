@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { BadRequestError, NotFoundError } = require("../expressError");
+const { BadRequestError, NotFoundError, ExpressError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
 /** Related functions for companies. */
@@ -49,15 +49,48 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll() {
-    const companiesRes = await db.query(
+  static async findAll({ name, minEmployees, maxEmployees } = {}) {
+    // set the base query that we will use to search the database
+    let baseQuery = 
           `SELECT handle,
                   name,
                   description,
                   num_employees AS "numEmployees",
                   logo_url AS "logoUrl"
            FROM companies
-           ORDER BY name`);
+           `;
+    // set up whereClauses and queryValues arrays to store the WHERE clause values for the SQL request
+    let whereClauses = [];
+    let queryValues = [];
+
+    if (minEmployees > maxEmployees){
+      throw new BadRequestError(`Minimum employees can not be greater than Maximum employees.`);
+    }
+    
+    // if minEmployees is not undefined, add the minEmployees to the queryValues and then use the length of queryValues to assign the positional placeholder, then store that value in the whereClauses array
+    if (minEmployees !== undefined) {
+      queryValues.push(minEmployees);
+      whereClauses.push(`num_employees >= $${queryValues.length}`)
+    }
+
+      // if maxEmployees is not undefined, add the maxEmployees to the queryValues and then use the length of queryValues to assign the positional placeholder, then store that value in the whereClauses array
+    if (maxEmployees !== undefined) {
+      queryValues.push(maxEmployees);
+      whereClauses.push(`num_employees >= $${queryValues.length}`)
+    }
+
+    // if there is a name, add th ename to the queryValues and then use the length of queryValues to assign the positional placeholder, then store that value in the whereClauses array
+    if(name) {
+      // add % so you can see all the names that include the query value
+      queryValues.push(`%${name}%`);
+      // add ILIKE for case-insensitive matching
+      whereClauses.push(`name ILIKE $${queryValues.length}`)
+    }
+
+    //  separate the ORDER BY name line so that it can remain at the end of the request
+    baseQuery =+ " ORDER BY name"
+
+    const companiesRes = await db.query(baseQuery, queryValues)
     return companiesRes.rows;
   }
 
