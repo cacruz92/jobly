@@ -108,18 +108,30 @@ class Company {
 
   static async get(handle) {
     const companyRes = await db.query(
-          `SELECT handle,
-                  name,
-                  description,
-                  num_employees AS "numEmployees",
-                  logo_url AS "logoUrl"
-           FROM companies
-           WHERE handle = $1`,
+          `SELECT c.handle,
+                  c.name,
+                  c.description,
+                  c.num_employees AS "numEmployees,
+                  c.logo_url AS "logoUrl",
+                  j.title AS "jobTitle",
+                  j.salary AS "jobSalary",
+                  j.equioty AS "jobEquity"
+            FROM companies as c
+            LEFT JOIN jobs AS j ON c.handle = j.company_handle
+            WHERE c.handle = $1`,
         [handle]);
 
     const company = companyRes.rows[0];
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
+
+    const jobs = companyRes.rows.filter(row => row.jobTitle).map(({ jobTitle, jobSalary, jobEquity}) => ({title: jobTitle, salary: jobSalary, equity: jobEquity}));
+
+    delete company.jobTitle;
+    delete company.jobSalary;
+    delete company.jobEquity;
+
+    company.jobs = jobs;
 
     return company;
   }
