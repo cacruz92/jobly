@@ -76,7 +76,7 @@ class Company {
       // if maxEmployees is not undefined, add the maxEmployees to the queryValues and then use the length of queryValues to assign the positional placeholder, then store that value in the whereClauses array
     if (maxEmployees !== undefined) {
       queryValues.push(maxEmployees);
-      whereClauses.push(`num_employees >= $${queryValues.length}`)
+      whereClauses.push(`num_employees <= $${queryValues.length}`)
     }
 
     // if there is a name, add th ename to the queryValues and then use the length of queryValues to assign the positional placeholder, then store that value in the whereClauses array
@@ -87,8 +87,12 @@ class Company {
       whereClauses.push(`name ILIKE $${queryValues.length}`)
     }
 
+    if(whereClauses.length > 0 ){
+      baseQuery += " WHERE " + whereClauses.join(" AND ");
+    }
+
     //  separate the ORDER BY name line so that it can remain at the end of the request
-    baseQuery =+ " ORDER BY name"
+    baseQuery += " ORDER BY name"
 
     const companiesRes = await db.query(baseQuery, queryValues)
     return companiesRes.rows;
