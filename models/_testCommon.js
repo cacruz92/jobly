@@ -1,7 +1,11 @@
 const bcrypt = require("bcrypt");
 
 const db = require("../db.js");
-const { BCRYPT_WORK_FACTOR } = require("../config");
+const { BCRYPT_WORK_FACTOR, SECRET_KEY } = require("../config");
+const jwt = require("jsonwebtoken")
+
+const u1Token = jwt.sign({ username: "u1", isAdmin: true }, SECRET_KEY)
+const u2Token = jwt.sign({ username: "u2", isAdmin: true }, SECRET_KEY)
 
 async function commonBeforeAll() {
   // noinspection SqlWithoutWhere
@@ -20,13 +24,16 @@ async function commonBeforeAll() {
                           password,
                           first_name,
                           last_name,
-                          email)
-        VALUES ('u1', $1, 'U1F', 'U1L', 'u1@email.com'),
-               ('u2', $2, 'U2F', 'U2L', 'u2@email.com')
+                          email,
+                          is_admin)
+        VALUES ('u1', $1, 'U1F', 'U1L', 'u1@email.com', true),
+               ('u2', $2, 'U2F', 'U2L', 'u2@email.com', true),
+               ('u3', $3, 'U3F', 'U3L', 'u3@email.com', false)
         RETURNING username`,
       [
         await bcrypt.hash("password1", BCRYPT_WORK_FACTOR),
         await bcrypt.hash("password2", BCRYPT_WORK_FACTOR),
+        await bcrypt.hash("password3", BCRYPT_WORK_FACTOR),
       ]);
 }
 
@@ -43,9 +50,11 @@ async function commonAfterAll() {
 }
 
 
+
 module.exports = {
   commonBeforeAll,
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  u1Token
 };

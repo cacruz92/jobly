@@ -34,6 +34,7 @@ describe("POST /users", function () {
           isAdmin: false,
         })
         .set("authorization", `Bearer ${u1Token}`);
+        console.log("Response body:", resp.body);
     expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual({
       user: {

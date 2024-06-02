@@ -29,7 +29,7 @@ describe("authenticate", function () {
       firstName: "U1F",
       lastName: "U1L",
       email: "u1@email.com",
-      isAdmin: false,
+      isAdmin: true,
     });
   });
 
@@ -116,15 +116,22 @@ describe("findAll", function () {
         firstName: "U1F",
         lastName: "U1L",
         email: "u1@email.com",
-        isAdmin: false,
+        isAdmin: true,
       },
       {
         username: "u2",
         firstName: "U2F",
         lastName: "U2L",
         email: "u2@email.com",
-        isAdmin: false,
+        isAdmin: true,
       },
+      {
+        email: "u3@email.com",
+        firstName: "U3F",
+        isAdmin: false,
+        lastName: "U3L",
+        username: "u3",
+            },
     ]);
   });
 });
@@ -139,7 +146,8 @@ describe("get", function () {
       firstName: "U1F",
       lastName: "U1L",
       email: "u1@email.com",
-      isAdmin: false,
+      isAdmin: true,
+      jobs: []
     });
   });
 
@@ -180,7 +188,7 @@ describe("update", function () {
       firstName: "U1F",
       lastName: "U1L",
       email: "u1@email.com",
-      isAdmin: false,
+      isAdmin: true,
     });
     const found = await db.query("SELECT * FROM users WHERE username = 'u1'");
     expect(found.rows.length).toEqual(1);

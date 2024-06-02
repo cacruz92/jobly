@@ -142,6 +142,8 @@ class User {
     if (!user) throw new NotFoundError(`No user: ${username}`);
 // create an array of jobIds associated with this username in the applications table. Filter out any null values
     const applications = userRes.rows.map(row => row.jobId).filter(Boolean)
+    
+    delete user.jobId
 
     user.jobs = applications;
 

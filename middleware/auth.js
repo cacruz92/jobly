@@ -21,9 +21,13 @@ function authenticateJWT(req, res, next) {
     if (authHeader) {
       const token = authHeader.replace(/^[Bb]earer /, "").trim();
       res.locals.user = jwt.verify(token, SECRET_KEY);
+      console.log("User authenticated:", res.locals.user); 
+    } else {
+      console.log("No authorization header present"); // Debugging output
     }
     return next();
   } catch (err) {
+    console.error("Authentication error:", err);
     return next();
   }
 }
