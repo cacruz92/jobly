@@ -118,7 +118,7 @@ class User {
   /** Given a username, return data about user.
    *
    * Returns { username, first_name, last_name, is_admin, jobs }
-   *   where jobs is { id, title, company_handle, company_name, state }
+   *   where jobs is { jobs: [jobId, jobId, jobId] }
    *
    * Throws NotFoundError if user not found.
    **/
@@ -136,22 +136,24 @@ class User {
            WHERE u.username = $1`,
         [username],
     );
-
+// identify user
     const user = userRes.rows[0];
-
+// if no user is found, throw error
     if (!user) throw new NotFoundError(`No user: ${username}`);
-
+// create an array of jobIds associated with this username in the applications table. Filter out any null values
     const applications = userRes.rows.map(row => row.jobId).filter(Boolean)
 
-    user.applications = applications;
+    user.jobs = applications;
 
-    return {
-      username: user.username, 
-      firstName: user.firstName, 
-      lastName: user.lastName, 
-      isAdmin: user.isAdmin, 
-      jobs: applications
-    };
+    return user;
+
+    // return {
+    //   username: user.username, 
+    //   firstName: user.firstName, 
+    //   lastName: user.lastName, 
+    //   isAdmin: user.isAdmin, 
+    //   jobs: applications
+    // };
   }
 
   /** Update user data with `data`.
