@@ -113,9 +113,10 @@ class Company {
                   c.description,
                   c.num_employees AS "numEmployees,
                   c.logo_url AS "logoUrl",
+                  j.id AS "jobId"
                   j.title AS "jobTitle",
                   j.salary AS "jobSalary",
-                  j.equioty AS "jobEquity"
+                  j.equity AS "jobEquity"
             FROM companies as c
             LEFT JOIN jobs AS j ON c.handle = j.company_handle
             WHERE c.handle = $1`,

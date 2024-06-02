@@ -125,13 +125,15 @@ class User {
 
   static async get(username) {
     const userRes = await db.query(
-          `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin"
-           FROM users
-           WHERE username = $1`,
+          `SELECT u.username,
+                  u.first_name AS "firstName",
+                  u.last_name AS "lastName",
+                  u.email,
+                  u.is_admin AS "isAdmin",
+                  a.job_id AS "jobId"
+           FROM users as u
+           LEFT JOIN applications AS a ON u.username = a.username
+           WHERE u.username = $1`,
         [username],
     );
 
@@ -139,7 +141,17 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
 
-    return user;
+    const applications = userRes.rows.map(row => row.jobId).filter(Boolean)
+
+    user.applications = applications;
+
+    return {
+      username: user.username, 
+      firstName: user.firstName, 
+      lastName: user.lastName, 
+      isAdmin: user.isAdmin, 
+      jobs: applications
+    };
   }
 
   /** Update user data with `data`.
