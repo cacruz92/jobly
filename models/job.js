@@ -51,10 +51,11 @@ class Job {
   static async findAll({ title, minSalary, hasEquity } = {}) {
     // set the base query that we will use to search the database
     let baseQuery = 
-          `SELECT title, 
+          `SELECT id,
+                title, 
                 salary, 
                 equity, 
-                company_handle AS "companyHandle",
+                company_handle AS "companyHandle"
            FROM jobs
            `;
     // set up whereClauses and queryValues arrays to store the WHERE clause values for the SQL request
@@ -75,8 +76,13 @@ class Job {
       whereClauses.push(`title ILIKE $${queryValues.length}`)
     }
 
-    if(hasEquity === true){
-        whereClauses.push('equity > 0')
+    if(hasEquity !== undefined){
+        if(hasEquity === true){
+            whereClauses.push('equity > 0')
+        }else if (hasEquity === false){
+            whereClauses.push('equity = 0')
+        }
+        
     }
 
     if(whereClauses.length > 0 ){
@@ -152,7 +158,7 @@ class Job {
    * Throws NotFoundError if company not found.
    **/
 
-  static async remove(handle) {
+  static async remove(title) {
     const result = await db.query(
           `DELETE
            FROM jobs

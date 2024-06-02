@@ -6,7 +6,7 @@ const jsonschema = require("jsonschema");
 const express = require("express");
 
 const { BadRequestError } = require("../expressError");
-const { ensureLoggedIn, ensureIsAdmin, ensureCorrectUserOrAdmin } = require("../middleware/auth");
+const { ensureLoggedIn, ensureIsAdmin } = require("../middleware/auth");
 const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNew.json");
@@ -85,7 +85,7 @@ router.post("/", ensureIsAdmin, async function (req, res, next) {
    *
    * Returns { title, salary, equity, companyHandle }
    *
-   * Authorization required: login
+   * Authorization required: Admin
    */
   
   router.patch("/:title", ensureIsAdmin, async function (req, res, next) {
@@ -105,7 +105,7 @@ router.post("/", ensureIsAdmin, async function (req, res, next) {
   
   /** DELETE /[title]  =>  { deleted: title }
    *
-   * Authorization: login
+   * Authorization: Admin
    */
   
   router.delete("/:title", ensureIsAdmin, async function (req, res, next) {
